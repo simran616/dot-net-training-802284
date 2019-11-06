@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -12,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Data;
 
@@ -38,6 +42,37 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken
 
             services.AddControllers();
             services.AddScoped<IRepository, MovieRepository>();
+
+
+
+            //JWT
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            services.AddAuthentication(Options =>
+            {
+                Options.DefaultAuthenticateScheme =
+                    JwtBearerDefaults.AuthenticationScheme;
+                Options.DefaultScheme =
+                    JwtBearerDefaults.AuthenticationScheme;
+                Options.DefaultChallengeScheme =
+                   JwtBearerDefaults.AuthenticationScheme;
+
+            })
+            .AddJwtBearer(cfg =>
+            {
+                cfg.RequireHttpsMetadata = false;
+                cfg.SaveToken = true;
+                cfg.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = Configuration["JwtIssuer"],
+                    ValidAudience = Configuration["JwtIssuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(Configuration["JwtKey"])),
+                    ClockSkew = TimeSpan.Zero // remove delay of token when expires
+
+                };
+            });
+
+
             services.AddMvc(option => option.EnableEndpointRouting = false)
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt =>

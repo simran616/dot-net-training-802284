@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Data;
@@ -12,6 +13,7 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Controlle
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MoviesController : ControllerBase
     {
        IRepository repository;
@@ -20,12 +22,15 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Controlle
             this.repository = repository;
         }
 
+
         // GET: api/Movies
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult Get()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(repository.GetMovies());
         }
+
+
 
         // GET: api/Movies/5
         [HttpGet("{id}", Name = "Get")]
@@ -33,7 +38,8 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Controlle
         {
             return "value";
         }
-
+        
+        
         // POST: api/Movies
         [HttpPost]
         public IActionResult Post([FromBody] MovieDto movie)
@@ -49,6 +55,9 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Controlle
             }
             return BadRequest(ModelState);
         }
+
+
+
         // PUT: api/Movies/5
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] MovieDto movie)
@@ -66,6 +75,8 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Controlle
             return BadRequest(ModelState);
         }
 
+
+
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -81,6 +92,42 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Controlle
                 return Ok();
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+
+        [HttpGet("actor/{id}")]
+        //GET api/movies/actor/1
+        //GET api/movies/actor?id=1
+        public IActionResult MoviesByActor(int id)
+        {
+            var movies = repository.GetMoviesByActor(id);
+            if (!movies.Any())
+            {
+                return NoContent();
+            }
+            return Ok(movies);
+        }
+        
+        
+        [HttpGet("genre/{id}")]
+        //GET api/movies/genre/1
+        //GET api/movies/genre?id=1
+        public IActionResult MoviesByGenre(int id)
+        {
+
+            {
+                bool isvalid = Enum.IsDefined(typeof(Genre), id);
+                if (!isvalid)
+                {
+                    return BadRequest("Invalid genre");
+                }
+                var movies = repository.GetMoviesByGenre((Genre)id);
+                if (!movies.Any())
+                {
+                    return NoContent();
+                }
+                return Ok(movies);
+            }
         }
     }
 }

@@ -165,35 +165,38 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Data
             }
         }
 
-        public bool UpdateMovie(MovieDto movie)
+        public object GetMovie(int id)
         {
-            try
-            {
-                context.Movies.Add(movie.Movie);
-                context.SaveChanges();
-                var movieActors = context.MovieActors
-                    .Where(ma => ma.Movie == movie.Movie);
-                context.MovieActors.RemoveRange(movieActors);
-                context.SaveChanges();
-                //remove all relations
-                foreach (var actorId in movie.Actors)
-                {
-                    context.MovieActors.Add(new MovieActor
-                    {
-                        Movie = movie.Movie,
-                        Actor = context.Actors.Find(actorId)
-                    });
-                    context.SaveChanges();
-                }
+            throw new NotImplementedException();
+        }
 
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
+        public bool DeleteMovie(object movie)
+        {
+            throw new NotImplementedException();
+        }
 
-                throw;
-            }
+        public IEnumerable<Movie> GetMoviesByActor(int actorId)
+        {
+                var movies = from m in context.Movies
+                             join ma in context.MovieActors on m.Id equals ma.MovieId
+                             where ma.ActorId == actorId
+                             select m;
+                return movies;
+
+        }
+
+        public IEnumerable<Movie> GetMoviesByGenre(Genre genre)
+        {
+            return context.Movies.Where(m => m.Genre == (Genre)genre);
+        }
+
+        public IEnumerable<Actor> GetActorsByMovie(int movieId)
+        {
+            var actors = from a in context.Actors
+                         join ma in context.MovieActors on a.Id equals ma.ActorId
+                         where ma.MovieId == movieId
+                         select a;
+            return actors;
         }
     }
 }

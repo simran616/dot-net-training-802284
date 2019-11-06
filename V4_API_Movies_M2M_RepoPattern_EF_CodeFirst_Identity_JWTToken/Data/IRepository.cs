@@ -20,6 +20,9 @@ namespace V4_API_Movies_M2M_RepoPattern_EF_CodeFirst_Identity_JWTToken.Data
             bool UpdateMovie(MovieDto movie);
             object GetMovie(int id);
             bool DeleteMovie(object movie);
+            IEnumerable<Movie> GetMoviesByActor(int actorId);
+            IEnumerable<Movie> GetMoviesByGenre(Genre genre);
+        IEnumerable<Actor> GetActorsByMovie(int movieId);
     }
 
 
